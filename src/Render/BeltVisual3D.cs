@@ -25,8 +25,12 @@ public partial class BeltVisual3D : Node3D
     /// <summary>Belt rate, in items per minute. Must be one of <see cref="BeltTiers"/>.</summary>
     [Export] public int ItemsPerMinute = BeltTiers.Mk3;
 
-    /// <summary>Visual size of one item cube, in metres.</summary>
-    [Export] public Vector3 ItemSize = new(0.35f, 0.2f, 0.35f);
+    /// <summary>
+    /// Visual size of one item cube, in metres. The Z size should stay under the belt's
+    /// item spacing (0.25m at the default <see cref="SimConstants.ItemSpacing"/>) or a
+    /// saturated belt renders as one continuous bar instead of visibly separate items.
+    /// </summary>
+    [Export] public Vector3 ItemSize = new(0.3f, 0.25f, 0.18f);
 
     private static readonly ItemId DemoItem = new(1);
 
@@ -68,7 +72,13 @@ public partial class BeltVisual3D : Node3D
 
     private void BuildVisual()
     {
-        var mesh = new BoxMesh { Size = ItemSize };
+        // Unshaded materials: this demo has no lighting setup to get right, and item
+        // visibility shouldn't depend on one. A real belt/item material is a Phase 1 concern.
+        var mesh = new BoxMesh
+        {
+            Size = ItemSize,
+            Material = new StandardMaterial3D { ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, AlbedoColor = new Color(1f, 0.55f, 0.1f) },
+        };
         _multiMesh = new MultiMesh
         {
             TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
@@ -77,14 +87,25 @@ public partial class BeltVisual3D : Node3D
             VisibleInstanceCount = 0,
         };
 
-        var multiMeshInstance = new MultiMeshInstance3D { Multimesh = _multiMesh };
+        float lengthMetres = MetresFromUnits(_belt.Length);
+        var multiMeshInstance = new MultiMeshInstance3D
+        {
+            Multimesh = _multiMesh,
+            // The auto-computed AABB doesn't account for instances spread along the belt's
+            // length until they've actually been placed once, so a explicit box avoids a
+            // frustum-culling false negative on the first rendered frames.
+            CustomAabb = new Aabb(new Vector3(-1, -1, -1), new Vector3(2, 2, lengthMetres + 2)),
+        };
         AddChild(multiMeshInstance);
 
         // Placeholder belt surface. A real belt mesh/shader is a Phase 1 concern.
-        float lengthMetres = MetresFromUnits(_belt.Length);
         var beltInstance = new MeshInstance3D
         {
-            Mesh = new BoxMesh { Size = new Vector3(0.6f, 0.05f, lengthMetres) },
+            Mesh = new BoxMesh
+            {
+                Size = new Vector3(0.6f, 0.05f, lengthMetres),
+                Material = new StandardMaterial3D { ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, AlbedoColor = new Color(0.3f, 0.3f, 0.32f) },
+            },
             Position = new Vector3(0, -0.15f, lengthMetres / 2f),
         };
         AddChild(beltInstance);

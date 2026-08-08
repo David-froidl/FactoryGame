@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://ci0wm1xtwy6g3"]
 
-[ext_resource type="Script" path="res://src/Render/BeltVisual3D.cs" id="1"]
+[ext_resource type="Script" uid="uid://japorn8iv83t" path="res://src/Render/BeltVisual3D.cs" id="1"]
 
-[node name="BeltDemo" type="Node3D"]
+[node name="BeltDemo" type="Node3D" unique_id=1815961184]
 script = ExtResource("1")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.819152, 0.573576, 0, -0.573576, 0.819152, -2, 3, -6)
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1714120382]
+transform = Transform3D(-4.371139e-08, -0.25881904, 0.9659258, 0, 0.9659258, 0.25881904, -1, 1.131334e-08, -4.222196e-08, 7, 2.5, 5)
 current = true
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=979746814]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 4, 0)
 shadow_enabled = true

@@ -20,14 +20,4 @@ project/assembly_name="FactoryGame"
 
 [physics]
 
-; Hard architecture constraint: the sim ticks at a fixed 20 Hz in _PhysicsProcess,
-; fully decoupled from render framerate. Do not change without updating
-; Factory.Sim.SimConstants.TicksPerSecond to match.
 common/physics_ticks_per_second=20
-common/max_physics_steps_per_frame=8
-
-[rendering]
-
-; Default renderer is fine for a laptop-first factory game; Compatibility (GLES3) is
-; the low-power fallback if Forward Plus proves too heavy during playtesting.
-renderer/rendering_method="forward_plus"
