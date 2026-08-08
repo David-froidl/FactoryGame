@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- net8.0 because that is what GodotSharp still ships (verified through Godot 4.7.x). -->
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Factory.Sim</RootNamespace>
+    <AssemblyName>Factory.Sim</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <!--
+      Godot builds ExportDebug/ExportRelease as well as Debug/Release. A referenced
+      library must declare them or exporting the game fails to resolve this project.
+    -->
+    <Configurations>Debug;Release;ExportDebug;ExportRelease</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'ExportDebug' ">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'ExportRelease' ">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!--
+    Hard rule: this project must never reference GodotSharp or any engine assembly.
+    It has to run headlessly under `dotnet test`.
+  -->
+
+</Project>
