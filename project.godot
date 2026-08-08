@@ -1,0 +1,33 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="FactoryGame"
+run/main_scene="res://scenes/belt_demo/belt_demo.tscn"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+
+[dotnet]
+
+project/assembly_name="FactoryGame"
+
+[physics]
+
+; Hard architecture constraint: the sim ticks at a fixed 20 Hz in _PhysicsProcess,
+; fully decoupled from render framerate. Do not change without updating
+; Factory.Sim.SimConstants.TicksPerSecond to match.
+common/physics_ticks_per_second=20
+common/max_physics_steps_per_frame=8
+
+[rendering]
+
+; Default renderer is fine for a laptop-first factory game; Compatibility (GLES3) is
+; the low-power fallback if Forward Plus proves too heavy during playtesting.
+renderer/rendering_method="forward_plus"

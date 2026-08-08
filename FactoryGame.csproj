@@ -1,0 +1,28 @@
+<Project Sdk="Godot.NET.Sdk/4.7.1">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>FactoryGame</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The simulation core stays plain C# with zero Godot dependencies; this is the
+         only place the two worlds meet. -->
+    <ProjectReference Include="src\Sim\Factory.Sim.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      This csproj lives at the repo root (Godot requires the game's C# project next to
+      project.godot), so the SDK's default "**/*.cs" glob would otherwise also pull in
+      Factory.Sim's own sources (double-compiling what the ProjectReference already brings
+      in) and the xUnit test project (which needs packages this project doesn't have).
+    -->
+    <Compile Remove="src\Sim\**\*.cs" />
+    <Compile Remove="tests\**\*.cs" />
+  </ItemGroup>
+
+</Project>
