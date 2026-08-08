@@ -1,0 +1,51 @@
+# ---- Godot 4 ----
+# Editor-generated import cache and metadata. Never commit; it is machine-local.
+.godot/
+# Godot 1.x/3.x leftovers
+.import/
+export.cfg
+# Export presets can contain keystore paths and passwords.
+export_presets.cfg
+# Build output
+/build/
+/builds/
+/exports/
+/android/
+*.translation
+
+# ---- .NET / C# ----
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+.vs/
+*.nupkg
+*.snupkg
+TestResults/
+[Cc]overage*/
+*.coverage
+*.trx
+
+# Mono / Godot C# leftovers
+.mono/
+data_*/
+mono_crash.*.json
+
+# ---- Editors ----
+.idea/
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+*.swp
+*~
+
+# ---- OS ----
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
