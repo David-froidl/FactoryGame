@@ -1,0 +1,53 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://src/World/HeightmapTerrain.cs" id="1"]
+[ext_resource type="Script" path="res://src/World/OreNodeMarker.cs" id="2"]
+[ext_resource type="Resource" path="res://data/ore_nodes/iron_01.tres" id="3"]
+[ext_resource type="Resource" path="res://data/ore_nodes/copper_01.tres" id="4"]
+[ext_resource type="Resource" path="res://data/ore_nodes/limestone_01.tres" id="5"]
+[ext_resource type="Resource" path="res://data/ore_nodes/coal_01.tres" id="6"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_1"]
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("SkyMat_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+
+[node name="StaticWorld" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 60, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.8137, 0.5813, 0, -0.5813, 0.8137, 0, 250, 350)
+current = true
+
+[node name="OreNode_Iron" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("3")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 13.2, 60)
+
+[node name="OreNode_Copper" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("4")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 8.1, 40)
+
+[node name="OreNode_Limestone" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("5")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 7.1, -150)
+
+[node name="OreNode_Coal" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("6")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 8.0, -80)

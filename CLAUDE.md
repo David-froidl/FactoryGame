@@ -63,11 +63,18 @@ converted to metres and interpolated for display.
   Belts/                   BeltSegment, Splitter, Merger, BeltNetwork, ItemVoid (test/demo sink).
 /src/Render/               Godot-facing C# (MultiMesh rendering, tick/frame decoupling glue).
   BeltVisual3D.cs          Node3D that owns one BeltSegment + one MultiMesh; the sim/render boundary.
+/src/World/                Godot-facing C# for the static world: terrain and ore node placement.
+  HeightmapTerrain.cs      Builds ground mesh + collision from assets/terrain/heightmap.png at _Ready.
+  OreNodeResource.cs       Data-only Resource: OreType + OrePurity. No position — see OreNodeMarker.
+  OreNodeMarker.cs         Node3D placed in a scene; holds world position + a reference to the data.
 /scenes/                   .tscn scene files.
   belt_demo/               Minimal scene: one belt, rendered via MultiMesh, saturated to show motion.
-/data/                     Recipes/buildables as Resources or JSON. Empty until Phase 1.
+  static_world/            500x500m heightmap terrain, sky/sun, and the 4 ore node markers.
+/data/                     Recipes/buildables as Resources or JSON.
+  ore_nodes/               One .tres per placed ore deposit (OreNodeResource): type + purity.
 /tests/Factory.Sim.Tests/  xUnit tests for src/Sim. Runs with `dotnet test`, no Godot needed.
 /assets/                   Art, audio, fonts — tracked through Git LFS (see .gitattributes).
+  terrain/heightmap.png    Authored (not runtime-generated) grayscale heightmap for the static world.
 ```
 
 `FactoryGame.csproj` lives at the repo root because Godot expects the game's C# project next
@@ -97,11 +104,17 @@ against the real `GodotSharp` package, without needing the Godot editor open.
 
 - **Phase 0 (done):** Project scaffolding, sim core (belts, splitters, mergers, backpressure),
   xUnit coverage, minimal MultiMesh belt render demo.
+- **Static world (done, out of order — explicitly requested):** Fixed 500x500m heightmap
+  terrain (`src/World/HeightmapTerrain.cs`) with flat buildable plateaus baked into the
+  heightmap, a sky + directional light, and 4 data-driven ore node Resources (Iron, Copper,
+  Limestone, Coal) placed as markers. No procedural generation — the heightmap is a static
+  authored asset, not computed at runtime. No player controller, no building placement yet;
+  the terrain has collision (`HeightMapShape3D`) so that's ready for Phase 2 to use.
 - **Phase 1:** Data-driven machines (`Machine` base class, recipe/buildable Resources),
   item registry, a real belt/item mesh and material instead of placeholder boxes.
 - **Phase 2:** Player controller, build mode (placing belts/machines on a grid), save/load.
 - **Phase 3:** Power grid, tech tree / unlocks, UI (inventory, build menu, statistics).
 
-Nothing beyond Phase 0 is implemented yet. Do not start Phase 1+ work without being asked —
-in particular, no player controller, terrain, UI, power grid, or tech tree until explicitly
-requested.
+Beyond Phase 0 and the static world above, nothing is implemented yet. Do not start Phase 1+
+work without being asked — in particular, no player controller, UI, power grid, or tech tree
+until explicitly requested.
