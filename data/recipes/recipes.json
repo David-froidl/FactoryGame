@@ -1,6 +1,18 @@
 {
   "recipes": [
     {
+      "id": "ferrite_extraction",
+      "inputs": [],
+      "outputs": [ { "item": "ferrite_ore", "count": 1 } ],
+      "durationTicks": 40
+    },
+    {
+      "id": "copperite_extraction",
+      "inputs": [],
+      "outputs": [ { "item": "copperite_ore", "count": 1 } ],
+      "durationTicks": 40
+    },
+    {
       "id": "ferrite_smelting",
       "inputs": [ { "item": "ferrite_ore", "count": 1 } ],
       "outputs": [ { "item": "ferrite_ingot", "count": 1 } ],

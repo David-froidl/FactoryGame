@@ -51,9 +51,8 @@ Any violation of the rules above (duplicate id, unknown item reference, non-posi
 count/duration, ambiguous or missing duration field, missing file, malformed JSON) throws
 `GameDataException` naming the offending record.
 
-## Not yet implemented
+## Zero-input recipes
 
-Extractors (ore -> raw item, no input, ~2s cycle) are intentionally not defined here yet
-(Phase 1 scope). Phase 2 will add them as ordinary `RecipeDefinition`s with an empty
-`inputs` array — the loader already supports zero-input recipes, so no schema or loader
-change is expected to be needed for that.
+`ferrite_extraction` and `copperite_extraction` (added in Phase 4) are ordinary recipes
+with an empty `inputs` array — the extractor buildables reference these. No schema or
+loader change was needed for that; empty `inputs` was supported from Phase 1 on.

@@ -285,4 +285,23 @@ public class MachineTests
         Assert.Equal(1, sink.Consumed);
         Assert.Equal(ingot, recipe.Outputs[0].Item);
     }
+
+    [Fact]
+    public void FerriteExtractionRecipeFromProductionDataNeedsNoInput()
+    {
+        GameData data = GameDataLoader.LoadGameData(
+            RepoPaths.DataFile("items", "items.json"),
+            RepoPaths.DataFile("recipes", "recipes.json"));
+        RecipeDefinition recipe = data.Recipes.Get("ferrite_extraction");
+
+        var machine = new Machine(recipe, inputCapacityPerSlot: 5, outputCapacity: 5);
+        var sink = new ItemVoid();
+        machine.Output = sink;
+
+        Assert.Empty(recipe.Inputs);
+        for (int i = 0; i <= recipe.DurationTicks; i++) machine.Tick();
+
+        Assert.Equal(1, machine.TotalCyclesCompleted);
+        Assert.Equal(1, sink.Consumed);
+    }
 }

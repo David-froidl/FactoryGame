@@ -24,13 +24,22 @@ public class GameDataLoaderTests
     }
 
     [Fact]
-    public void LoadsAllThreeProductionRecipes()
+    public void LoadsAllFiveProductionRecipes()
     {
         GameData data = LoadProductionData();
 
-        Assert.Equal(3, data.Recipes.All.Count);
-        foreach (string id in new[] { "ferrite_smelting", "copper_smelting", "assembly_core" })
+        Assert.Equal(5, data.Recipes.All.Count);
+        foreach (string id in new[] { "ferrite_extraction", "copperite_extraction", "ferrite_smelting", "copper_smelting", "assembly_core" })
             Assert.True(data.Recipes.TryGet(id, out _), $"missing recipe '{id}'");
+    }
+
+    [Fact]
+    public void ExtractionRecipesHaveNoInputs()
+    {
+        GameData data = LoadProductionData();
+
+        Assert.Empty(data.Recipes.Get("ferrite_extraction").Inputs);
+        Assert.Empty(data.Recipes.Get("copperite_extraction").Inputs);
     }
 
     [Fact]
@@ -52,6 +61,8 @@ public class GameDataLoaderTests
     }
 
     [Theory]
+    [InlineData("ferrite_extraction", 40)]
+    [InlineData("copperite_extraction", 40)]
     [InlineData("ferrite_smelting", 60)]
     [InlineData("copper_smelting", 60)]
     [InlineData("assembly_core", 120)]
