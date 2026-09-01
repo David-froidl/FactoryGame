@@ -1,0 +1,25 @@
+{
+  "recipes": [
+    {
+      "id": "ferrite_smelting",
+      "inputs": [ { "item": "ferrite_ore", "count": 1 } ],
+      "outputs": [ { "item": "ferrite_ingot", "count": 1 } ],
+      "durationTicks": 60
+    },
+    {
+      "id": "copper_smelting",
+      "inputs": [ { "item": "copperite_ore", "count": 1 } ],
+      "outputs": [ { "item": "copper_ingot", "count": 1 } ],
+      "durationTicks": 60
+    },
+    {
+      "id": "assembly_core",
+      "inputs": [
+        { "item": "ferrite_ingot", "count": 2 },
+        { "item": "copper_ingot", "count": 1 }
+      ],
+      "outputs": [ { "item": "assembly_core", "count": 1 } ],
+      "durationTicks": 120
+    }
+  ]
+}

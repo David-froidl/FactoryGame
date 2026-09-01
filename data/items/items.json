@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "id": "ferrite_ore", "displayName": "Ferrit-Erz" },
+    { "id": "copperite_ore", "displayName": "Kupferit-Erz" },
+    { "id": "ferrite_ingot", "displayName": "Ferrit-Barren" },
+    { "id": "copper_ingot", "displayName": "Kupfer-Barren" },
+    { "id": "assembly_core", "displayName": "Montagekern" }
+  ]
+}
