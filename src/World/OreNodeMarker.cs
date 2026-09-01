@@ -16,6 +16,14 @@ public partial class OreNodeMarker : Node3D
 {
     [Export] public OreNodeResource? Data { get; set; }
 
+    /// <summary>
+    /// True (default, unchanged from before) means any extractor buildable requiring this
+    /// ore type may be placed here. Set false to keep a deposit visible but not yet
+    /// buildable — used in the vertical slice scene for Limestone/Coal, which have no
+    /// recipe yet.
+    /// </summary>
+    [Export] public bool IsUsable { get; set; } = true;
+
     public override void _Ready()
     {
         if (Data is null)
@@ -31,25 +39,25 @@ public partial class OreNodeMarker : Node3D
 
     private MeshInstance3D BuildMesh()
     {
+        Color color = ColorFor(Data!.OreType);
+        if (!IsUsable) color = color.Lerp(Colors.Gray, 0.6f); // dimmed: visible, not yet buildable on
+
         var mesh = new CylinderMesh
         {
             TopRadius = 3.5f,
             BottomRadius = 4.5f,
             Height = 1.2f,
-            Material = new StandardMaterial3D
-            {
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel,
-                AlbedoColor = ColorFor(Data!.OreType),
-            },
+            Material = new StandardMaterial3D { ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel, AlbedoColor = color },
         };
         return new MeshInstance3D { Mesh = mesh, Position = new Vector3(0, 0.6f, 0) };
     }
 
     private Label3D BuildLabel()
     {
+        string suffix = IsUsable ? "" : " (noch nicht nutzbar)";
         return new Label3D
         {
-            Text = $"{Data!.OreType} ({Data.Purity})",
+            Text = $"{Data!.OreType} ({Data.Purity}){suffix}",
             Position = new Vector3(0, 3.5f, 0),
             Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
             FontSize = 48,

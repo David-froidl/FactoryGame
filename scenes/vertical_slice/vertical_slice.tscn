@@ -1,0 +1,76 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://src/World/HeightmapTerrain.cs" id="1"]
+[ext_resource type="Script" path="res://src/World/OreNodeMarker.cs" id="2"]
+[ext_resource type="Resource" path="res://data/ore_nodes/iron_01.tres" id="3"]
+[ext_resource type="Resource" path="res://data/ore_nodes/copper_01.tres" id="4"]
+[ext_resource type="Resource" path="res://data/ore_nodes/limestone_01.tres" id="5"]
+[ext_resource type="Resource" path="res://data/ore_nodes/coal_01.tres" id="6"]
+[ext_resource type="Script" path="res://src/Game/GameRoot.cs" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="8"]
+[ext_resource type="Script" path="res://src/Building/BuildSystem.cs" id="9"]
+[ext_resource type="Script" path="res://src/UI/HudRoot.cs" id="10"]
+[ext_resource type="Script" path="res://src/UI/PauseMenuUI.cs" id="11"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_1"]
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("SkyMat_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+
+[node name="VerticalSlice" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 60, 0)
+shadow_enabled = true
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("1")
+
+[node name="GameRoot" type="Node" parent="."]
+script = ExtResource("7")
+
+[node name="OreNode_Ferrit" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("3")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 13.2, 60)
+
+[node name="OreNode_Kupferit" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("4")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 8.1, 40)
+
+[node name="OreNode_Limestone" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("5")
+IsUsable = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 7.1, -150)
+
+[node name="OreNode_Coal" type="Node3D" parent="."]
+script = ExtResource("2")
+Data = ExtResource("6")
+IsUsable = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 8.0, -80)
+
+[node name="Player" parent="." instance=ExtResource("8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, 0)
+
+[node name="BuildSystem" type="Node" parent="."]
+script = ExtResource("9")
+CameraPath = NodePath("../Player/Head/Camera3D")
+PlayerPath = NodePath("../Player")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("10")
+BuildSystemPath = NodePath("../BuildSystem")
+PlayerInteractorPath = NodePath("../Player/PlayerInteractor")
+
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+script = ExtResource("11")
+PlayerControllerPath = NodePath("../Player")
