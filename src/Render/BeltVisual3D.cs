@@ -2,6 +2,7 @@ using Factory.Sim;
 using Factory.Sim.Belts;
 using Factory.Sim.Items;
 using FactoryGame.Game;
+using FactoryGame.World;
 using Godot;
 
 namespace FactoryGame.Render;
@@ -105,6 +106,7 @@ public partial class BeltVisual3D : Node3D, ITickSnapshotConsumer
             {
                 _gameRoot.Network.Add(Belt);
                 _gameRoot.RegisterConsumer(this);
+                AddToGroup(BuildingGroups.PlacedBelts);
             }
         }
 

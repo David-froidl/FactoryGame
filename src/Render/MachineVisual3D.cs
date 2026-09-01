@@ -17,12 +17,14 @@ namespace FactoryGame.Render;
 /// that is Phase 6's <c>BuildSystem</c>. This only constructs and displays the sim object
 /// once something else has already decided a placement is valid and set <see cref="Buildable"/>.
 /// </summary>
-public partial class MachineVisual3D : Node3D
+public partial class MachineVisual3D : Node3D, IPlaceable
 {
     [Export] public BuildableResource? Buildable;
 
     /// <summary>The underlying sim machine. Null until a valid <see cref="Buildable"/> has been assigned and _Ready has run.</summary>
     public Machine? Sim { get; private set; }
+
+    public Vector3 FootprintSize => Buildable?.FootprintSize ?? Vector3.Zero;
 
     private Label3D _statusLabel = null!;
 
@@ -44,6 +46,7 @@ public partial class MachineVisual3D : Node3D
         RecipeDefinition recipe = gameRoot.Data.Recipes.Get(Buildable.RecipeKey);
         Sim = new Machine(recipe, Buildable.InputCapacityPerSlot, Buildable.OutputCapacity);
         gameRoot.Network.Add(Sim);
+        AddToGroup(BuildingGroups.PlacedBuildings);
 
         AddChild(BuildMesh());
         _statusLabel = BuildStatusLabel();

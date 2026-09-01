@@ -8,8 +8,9 @@ namespace FactoryGame.World;
 /// this way means the same <see cref="OreNodeResource"/> could back several nodes, and
 /// moving a node in the editor never touches the data file.
 ///
-/// Purely a placeholder marker for this phase — no extraction, no building snapping. A
-/// miner building attaching to this is later work.
+/// Joins the <see cref="BuildingGroups.OreNodes"/> group so <c>PlacementValidator</c> can
+/// find nearby deposits by simple distance instead of a physics query — this marker still
+/// has no collision shape of its own.
 /// </summary>
 public partial class OreNodeMarker : Node3D
 {
@@ -23,6 +24,7 @@ public partial class OreNodeMarker : Node3D
             return;
         }
 
+        AddToGroup(BuildingGroups.OreNodes);
         AddChild(BuildMesh());
         AddChild(BuildLabel());
     }

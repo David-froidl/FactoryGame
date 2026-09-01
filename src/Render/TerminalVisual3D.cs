@@ -12,12 +12,14 @@ namespace FactoryGame.Render;
 /// plus the scene's loaded item data, registers it into the shared <see cref="GameRoot"/>
 /// network, and renders a placeholder box plus a live "delivered/required" status label.
 /// </summary>
-public partial class TerminalVisual3D : Node3D
+public partial class TerminalVisual3D : Node3D, IPlaceable
 {
     [Export] public BuildableResource? Buildable;
 
     /// <summary>The underlying sim terminal. Null until a valid <see cref="Buildable"/> has been assigned and _Ready has run.</summary>
     public MilestoneTerminal? Sim { get; private set; }
+
+    public Vector3 FootprintSize => Buildable?.FootprintSize ?? Vector3.Zero;
 
     private Label3D _statusLabel = null!;
 
@@ -40,6 +42,7 @@ public partial class TerminalVisual3D : Node3D
         var definition = new MilestoneDefinition(Buildable.Id, requiredItem, Buildable.MilestoneRequiredCount, Buildable.MilestoneUnlockId);
         Sim = new MilestoneTerminal(definition, gameRoot.UnlockState);
         gameRoot.Network.Add(Sim);
+        AddToGroup(BuildingGroups.PlacedBuildings);
 
         AddChild(BuildMesh());
         _statusLabel = BuildStatusLabel();
