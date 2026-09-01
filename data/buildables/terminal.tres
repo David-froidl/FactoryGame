@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildableResource" format=3]
+
+[ext_resource type="Script" path="res://src/World/BuildableResource.cs" id="1"]
+
+[resource]
+script = ExtResource("1")
+Id = "terminal"
+DisplayName = "Fortschritts-Terminal"
+Category = 2
+FootprintSize = Vector3(2, 3, 2)
+PlaceholderColor = Color(0.85, 0.75, 0.15, 1)
+MilestoneRequiredItemKey = "assembly_core"
+MilestoneRequiredCount = 10
+MilestoneUnlockId = "belt_mk2"

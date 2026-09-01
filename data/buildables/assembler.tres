@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildableResource" format=3]
+
+[ext_resource type="Script" path="res://src/World/BuildableResource.cs" id="1"]
+
+[resource]
+script = ExtResource("1")
+Id = "assembler"
+DisplayName = "Assembler"
+Category = 0
+FootprintSize = Vector3(3, 2.5, 3)
+PlaceholderColor = Color(0.25, 0.45, 0.75, 1)
+RecipeKey = "assembly_core"
+InputCapacityPerSlot = 10
+OutputCapacity = 10

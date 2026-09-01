@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BuildableResource" format=3]
+
+[ext_resource type="Script" path="res://src/World/BuildableResource.cs" id="1"]
+
+[resource]
+script = ExtResource("1")
+Id = "smelter_ferrite"
+DisplayName = "Ferrit-Schmelzwerk"
+Category = 0
+FootprintSize = Vector3(2, 2.5, 2)
+PlaceholderColor = Color(0.75, 0.35, 0.15, 1)
+RecipeKey = "ferrite_smelting"
+InputCapacityPerSlot = 10
+OutputCapacity = 10
