@@ -1,3 +1,4 @@
+using Factory.Sim.Production;
 using Factory.Sim.Tests.Support;
 
 namespace Factory.Sim.Tests;
@@ -108,5 +109,59 @@ public class BeltNetworkTests
         network.Add(a);
         network.Add(a);
         Assert.Single(network.Nodes);
+    }
+
+    // ---- RegisterFeed: for source types (e.g. Machine) that manage Output directly ----
+
+    [Fact]
+    public void RegisterFeedOrdersASourceBeforeItsSinkDownstreamFirst()
+    {
+        var network = new BeltNetwork();
+        var machine = new Machine(ProductionScenario.ZeroInputRecipe("extract", new ItemId(1), 1, 1), inputCapacityPerSlot: 5, outputCapacity: 5);
+        BeltSegment belt = Scenario.Belt(1, BeltTiers.Mk3);
+
+        machine.Output = belt;
+        network.RegisterFeed(machine, belt);
+        network.Connect(belt, new ItemVoid());
+
+        IReadOnlyList<ISimNode> order = network.TickOrder;
+        int beltIndex = -1, machineIndex = -1;
+        for (int i = 0; i < order.Count; i++)
+        {
+            if (ReferenceEquals(order[i], belt)) beltIndex = i;
+            if (ReferenceEquals(order[i], machine)) machineIndex = i;
+        }
+
+        Assert.True(beltIndex >= 0 && machineIndex >= 0, "both nodes must be in the tick order");
+        Assert.True(beltIndex < machineIndex, "the belt (downstream) must tick before the machine (upstream) that feeds it");
+    }
+
+    [Fact]
+    public void RegisterFeedActuallyMovesItemsEndToEnd()
+    {
+        var network = new BeltNetwork();
+        var recipe = ProductionScenario.ZeroInputRecipe("extract", new ItemId(1), 1, 1);
+        var machine = new Machine(recipe, inputCapacityPerSlot: 5, outputCapacity: 5);
+        BeltSegment belt = Scenario.Belt(1, BeltTiers.Mk3);
+        var sink = new ItemVoid();
+
+        machine.Output = belt;
+        network.RegisterFeed(machine, belt);
+        network.Connect(belt, sink);
+
+        for (int t = 0; t < 200; t++) network.Tick();
+
+        Assert.True(sink.Consumed > 0, "an item produced by the machine must actually arrive at the belt's sink");
+    }
+
+    [Fact]
+    public void RegisterFeedRejectsNullArguments()
+    {
+        var network = new BeltNetwork();
+        BeltSegment belt = Scenario.Belt(1, BeltTiers.Mk3);
+        var machine = new Machine(ProductionScenario.ZeroInputRecipe("extract", new ItemId(1), 1, 1), inputCapacityPerSlot: 5, outputCapacity: 5);
+
+        Assert.Throws<ArgumentNullException>(() => network.RegisterFeed(null!, belt));
+        Assert.Throws<ArgumentNullException>(() => network.RegisterFeed(machine, null!));
     }
 }

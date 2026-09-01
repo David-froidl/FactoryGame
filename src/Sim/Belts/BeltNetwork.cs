@@ -89,6 +89,20 @@ public sealed class BeltNetwork
         if (from is ISimNode node) Link(node, to);
     }
 
+    /// <summary>
+    /// Registers that <paramref name="from"/> feeds <paramref name="to"/>, for correct
+    /// downstream-first tick ordering — without setting the connection itself. For source
+    /// types that manage their own output wiring directly (e.g. <c>Machine.Output</c>) rather
+    /// than through one of the typed <c>Connect</c> overloads above, which both set the
+    /// connection <i>and</i> register it; call this right after setting it yourself.
+    /// </summary>
+    public void RegisterFeed(ISimNode from, IItemSink to)
+    {
+        ArgumentNullException.ThrowIfNull(from);
+        ArgumentNullException.ThrowIfNull(to);
+        LinkSink(from, to);
+    }
+
     /// <summary>Steps every node exactly once, downstream-first.</summary>
     public void Tick()
     {
