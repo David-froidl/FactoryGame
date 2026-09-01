@@ -23,6 +23,10 @@
     -->
     <Compile Remove="src\Sim\**\*.cs" />
     <Compile Remove="tests\**\*.cs" />
+    <!-- GamingTimeBlocker/ is an unrelated, untracked project that happens to sit in this
+         same directory; the SDK's default glob would otherwise pull its sources (and its
+         own xUnit test project, which needs packages this project doesn't have) in too. -->
+    <Compile Remove="GamingTimeBlocker\**\*.cs" />
   </ItemGroup>
 
 </Project>
