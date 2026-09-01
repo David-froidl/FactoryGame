@@ -49,6 +49,7 @@ public partial class MachineVisual3D : Node3D, IPlaceable
         AddToGroup(BuildingGroups.PlacedBuildings);
 
         AddChild(BuildMesh());
+        AddChild(BuildingCollision.BuildStaticBody(Buildable.FootprintSize));
         _statusLabel = BuildStatusLabel();
         AddChild(_statusLabel);
     }

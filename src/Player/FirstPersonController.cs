@@ -13,6 +13,10 @@ namespace FactoryGame.Player;
 /// Expects two children: a "Head" <see cref="Node3D"/> (pitch pivot, mouse-look up/down)
 /// holding a "Camera3D" (see <c>scenes/player/player.tscn</c>). Yaw rotates this node
 /// directly; only pitch is separated onto Head, the standard FPS rig split.
+///
+/// Owns none of the mouse-capture/Escape logic itself — <c>PauseMenuUI</c> (Phase 7) is the
+/// single place that toggles <see cref="Input.MouseMode"/> and this controller's
+/// <see cref="Enabled"/> flag, so the two systems can't fight over the same key/state.
 /// </summary>
 public partial class FirstPersonController : CharacterBody3D
 {
@@ -21,6 +25,9 @@ public partial class FirstPersonController : CharacterBody3D
     [Export] public float JumpVelocity = 4.5f;
     [Export] public float MouseSensitivity = 0.0025f;
     [Export] public float Gravity = 9.8f;
+
+    /// <summary>When false (set by PauseMenuUI while paused), movement and mouse look are ignored.</summary>
+    public bool Enabled { get; set; } = true;
 
     private Node3D _head = null!;
     private float _pitch;
@@ -33,6 +40,8 @@ public partial class FirstPersonController : CharacterBody3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (!Enabled) return;
+
         if (@event is InputEventMouseMotion motion && Input.MouseMode == Input.MouseModeEnum.Captured)
         {
             RotateY(-motion.Relative.X * MouseSensitivity);
@@ -41,17 +50,16 @@ public partial class FirstPersonController : CharacterBody3D
             _pitch = Mathf.Clamp(_pitch - motion.Relative.Y * MouseSensitivity, -pitchLimit, pitchLimit);
             _head.Rotation = new Vector3(_pitch, 0, 0);
         }
-
-        // Escape releases the mouse so a pause menu (Phase 7) or the OS can be reached;
-        // clicking back into the viewport re-captures it.
-        if (@event is InputEventKey { Pressed: true, Keycode: Key.Escape })
-            Input.MouseMode = Input.MouseModeEnum.Visible;
-        else if (@event is InputEventMouseButton { Pressed: true } && Input.MouseMode == Input.MouseModeEnum.Visible)
-            Input.MouseMode = Input.MouseModeEnum.Captured;
     }
 
     public override void _PhysicsProcess(double delta)
     {
+        if (!Enabled)
+        {
+            Velocity = Vector3.Zero;
+            return;
+        }
+
         Vector3 velocity = Velocity;
         float dt = (float)delta;
 
