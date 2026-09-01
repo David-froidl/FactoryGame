@@ -1,6 +1,7 @@
 using Factory.Sim;
 using Factory.Sim.Belts;
 using Factory.Sim.Items;
+using FactoryGame.Game;
 using Godot;
 
 namespace FactoryGame.Render;
@@ -11,13 +12,27 @@ namespace FactoryGame.Render;
 /// crosses into Godot state (metres, floats, frames), so the unit conversion and the
 /// tick/frame decoupling both live here and nowhere else.
 ///
-/// Simulation and rendering run at different rates on purpose: <see cref="_PhysicsProcess"/>
-/// only fires at the project's fixed physics rate (20 Hz, set in project.godot) and is the
-/// only place the sim advances. <see cref="_Process"/> fires once per rendered frame and
-/// only interpolates positions — it never touches sim state — so visuals stay smooth at
-/// 144 Hz while the sim itself stays perfectly reproducible at 20 Hz.
+/// Simulation and rendering run at different rates on purpose: the sim only advances once
+/// per physics tick (20 Hz, set in project.godot); <see cref="_Process"/> fires once per
+/// rendered frame and only interpolates positions — it never touches sim state — so visuals
+/// stay smooth at 144 Hz while the sim itself stays perfectly reproducible at 20 Hz.
+///
+/// Two ticking modes, chosen by <see cref="StandaloneDemoMode"/>:
+/// <list type="bullet">
+/// <item><b>Registered (default, every real placed belt from Phase 6 on):</b> this belt is
+/// added to the scene's shared <see cref="GameRoot"/>.<see cref="GameRoot.Network"/> and
+/// never feeds itself — items only arrive by another node connecting into <see cref="Belt"/>,
+/// exactly like a player-placed belt must. <see cref="GameRoot"/> ticks the shared network
+/// and calls <see cref="BeforeNetworkTick"/>/<see cref="AfterNetworkTick"/> on every belt in
+/// a guaranteed order (see <see cref="GameRoot"/> for why that ordering matters).</item>
+/// <item><b>Standalone (<c>scenes/belt_demo</c> only):</b> this belt owns a private network
+/// and sink and saturates itself with a demo item every tick, exactly as before this class
+/// supported a shared network at all. A demo scene has no <see cref="GameRoot"/> and needs
+/// none — self-feeding is demo scaffolding that must never leak into a real, player-placed
+/// belt, which is why it isn't the default.</item>
+/// </list>
 /// </summary>
-public partial class BeltVisual3D : Node3D
+public partial class BeltVisual3D : Node3D, ITickSnapshotConsumer
 {
     /// <summary>Belt length, in world tiles.</summary>
     [Export] public int LengthInTiles = 10;
@@ -32,11 +47,20 @@ public partial class BeltVisual3D : Node3D
     /// </summary>
     [Export] public Vector3 ItemSize = new(0.3f, 0.25f, 0.18f);
 
+    /// <summary>
+    /// True only for <c>scenes/belt_demo</c>: self-contained, self-feeding, self-ticking.
+    /// Every real, player-placed belt must leave this false — see the class summary.
+    /// </summary>
+    [Export] public bool StandaloneDemoMode;
+
     private static readonly ItemId DemoItem = new(1);
 
-    private BeltSegment _belt = null!;
-    private BeltNetwork _network = null!;
-    private ItemVoid _sink = null!;
+    /// <summary>The underlying sim belt. Connect other sim nodes to/from this to wire up gameplay.</summary>
+    public BeltSegment Belt { get; private set; } = null!;
+
+    private BeltNetwork? _standaloneNetwork; // set only in standalone mode
+    private ItemVoid? _standaloneSink;       // set only in standalone mode
+    private GameRoot? _gameRoot;             // set only in registered mode, once found
 
     private MultiMesh _multiMesh = null!;
 
@@ -58,17 +82,36 @@ public partial class BeltVisual3D : Node3D
     public override void _Ready()
     {
         int speed = SimConstants.ItemsPerMinuteToSpeed(ItemsPerMinute);
-        _belt = new BeltSegment(LengthInTiles * SimConstants.UnitsPerTile, speed);
-        _sink = new ItemVoid();
-        _network = new BeltNetwork();
-        _network.Connect(_belt, _sink);
+        Belt = new BeltSegment(LengthInTiles * SimConstants.UnitsPerTile, speed);
 
-        _prevPositions = new int[_belt.Capacity];
-        _curPositions = new int[_belt.Capacity];
-        _curItems = new ItemId[_belt.Capacity];
+        _prevPositions = new int[Belt.Capacity];
+        _curPositions = new int[Belt.Capacity];
+        _curItems = new ItemId[Belt.Capacity];
+
+        if (StandaloneDemoMode)
+        {
+            _standaloneSink = new ItemVoid();
+            _standaloneNetwork = new BeltNetwork();
+            _standaloneNetwork.Connect(Belt, _standaloneSink);
+        }
+        else
+        {
+            _gameRoot = GetTree().GetFirstNodeInGroup("game_root") as GameRoot;
+            if (_gameRoot is null)
+            {
+                GD.PushWarning($"{Name}: no GameRoot in this scene; this belt will never tick.");
+            }
+            else
+            {
+                _gameRoot.Network.Add(Belt);
+                _gameRoot.RegisterConsumer(this);
+            }
+        }
 
         BuildVisual();
     }
+
+    public override void _ExitTree() => _gameRoot?.UnregisterConsumer(this);
 
     private void BuildVisual()
     {
@@ -83,11 +126,11 @@ public partial class BeltVisual3D : Node3D
         {
             TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
             Mesh = mesh,
-            InstanceCount = _belt.Capacity,
+            InstanceCount = Belt.Capacity,
             VisibleInstanceCount = 0,
         };
 
-        float lengthMetres = MetresFromUnits(_belt.Length);
+        float lengthMetres = MetresFromUnits(Belt.Length);
         var multiMeshInstance = new MultiMeshInstance3D
         {
             Multimesh = _multiMesh,
@@ -113,15 +156,24 @@ public partial class BeltVisual3D : Node3D
 
     public override void _PhysicsProcess(double delta)
     {
+        if (!StandaloneDemoMode) return; // registered mode: GameRoot drives the snapshot calls below
+
+        BeforeNetworkTick();
+        Belt.TryAccept(DemoItem); // keep the belt saturated so motion is continuously visible in the demo
+        _standaloneNetwork!.Tick();
+        AfterNetworkTick();
+    }
+
+    public void BeforeNetworkTick()
+    {
         System.Array.Copy(_curPositions, _prevPositions, _curCount);
         _prevCount = _curCount;
-        _prevTotalPopped = _belt.TotalPopped;
+        _prevTotalPopped = Belt.TotalPopped;
+    }
 
-        // Keep the belt saturated so motion is continuously visible in the demo.
-        _belt.TryAccept(DemoItem);
-        _network.Tick();
-
-        _curCount = _belt.CopyTo(_curPositions, _curItems);
+    public void AfterNetworkTick()
+    {
+        _curCount = Belt.CopyTo(_curPositions, _curItems);
         _tickProgress = 0.0;
     }
 
@@ -130,13 +182,14 @@ public partial class BeltVisual3D : Node3D
         _tickProgress += delta * SimConstants.TicksPerSecond;
         float t = (float)Mathf.Clamp(_tickProgress, 0.0, 1.0);
 
-        // A belt pops at most one item per tick (from the front) and this demo inserts at
-        // most one per tick (at the rear), so this is always 0 or 1.
-        int poppedThisTick = (int)(_belt.TotalPopped - _prevTotalPopped);
+        // Every pusher in the sim (a belt's head, a machine's output, a splitter) hands over
+        // at most one item per tick, so at most one item can have entered this belt's rear
+        // since the last snapshot — this is always 0 or 1.
+        int poppedThisTick = (int)(Belt.TotalPopped - _prevTotalPopped);
         int carriedOver = _prevCount - poppedThisTick;
 
         _multiMesh.VisibleInstanceCount = _curCount;
-        float lengthMetres = MetresFromUnits(_belt.Length);
+        float lengthMetres = MetresFromUnits(Belt.Length);
 
         for (int i = 0; i < _curCount; i++)
         {

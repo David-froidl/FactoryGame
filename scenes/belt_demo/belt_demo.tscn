@@ -4,6 +4,7 @@
 
 [node name="BeltDemo" type="Node3D" unique_id=1815961184]
 script = ExtResource("1")
+StandaloneDemoMode = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1714120382]
 transform = Transform3D(-4.371139e-08, -0.25881904, 0.9659258, 0, 0.9659258, 0.25881904, -1, 1.131334e-08, -4.222196e-08, 7, 2.5, 5)
